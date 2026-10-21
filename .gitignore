@@ -1,2 +1,10 @@
 reference_solution.py
 generate_bronze.py
+# Output of reference_solution.py
+silver/survey_response.csv
+silver/survey_rejected.csv
+silver/ref_city.csv
+silver/_dq_report.csv
+gold/students_by_region.csv
+gold/coffee_by_city.csv
+gold/drink_preference_by_age_group.csv

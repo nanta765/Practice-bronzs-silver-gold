@@ -1,73 +1,47 @@
-# Practice: build bronze, silver and gold from a class survey (15 minutes)
+# Practice: bronze, silver, gold (15 minutes)
+
+Turn 300 raw survey answers into trusted tables and one business answer.
+Write **one Python script, `pipeline.py`**, that reads bronze and writes silver and gold.
+AI tools and search are allowed.
 
 ```text
-lab/
-  bronze/class_survey_raw.csv   given: 300 survey answers, typed with no format rules
-  silver/                       empty: students write the clean, trusted tables here
-  gold/                         empty: students write the answers here
-  generate_bronze.py            rebuilds the bronze file (fixed seed, identical every run)
-  reference_solution.py         instructor only: fills silver/ and gold/
+bronze/class_survey_raw.csv   given, do not edit
+silver/                       pipeline.py writes here
+gold/                         pipeline.py writes here
+pipeline.py                   you write this
 ```
 
-AI tools and search are allowed. Any tool works: Python, SQL (DuckDB), or a spreadsheet.
+Run it with:
 
-## The data
+```bash
+python3 pipeline.py
+```
 
-`bronze/class_survey_raw.csv`, 300 rows, synthetic (no real people):
-`response_id, submitted_at, student_id, hometown, birthday, coffee_per_week, favorite_drink, device`.
+## Tasks
 
-## Steps for students
+| Time | Layer | Create |
+|---|---|---|
+| 0-2 min | Bronze | Nothing. Open the file: how many rows, how many students? |
+| 2-11 min | Silver | `silver/survey_response.csv` and `silver/survey_rejected.csv` |
+| 11-15 min | Gold | `gold/students_by_region.csv` |
 
-| Min | Layer | Must do | Go further |
-|---|---|---|---|
-| 0-2 | Bronze | Open the file. Do not edit it. Count rows and students. | |
-| 2-11 | Silver | `silver/survey_response.csv`: one row per student, clean typed columns, plus `_loaded_at` and `_source_file`. `silver/survey_rejected.csv`: rows you refuse, with a `reject_reason`. | `silver/dim_city.csv` (city, province, island), `silver/_dq_report.csv` |
-| 11-15 | Gold | `gold/students_by_region.csv`: students per city and province, with share of class. | `gold/coffee_by_city.csv`, `gold/drink_preference_by_age_group.csv` |
+**`silver/survey_response.csv`**: one row per student. Clean, typed columns, plus
+`_loaded_at` (when you wrote it) and `_source_file` (where it came from).
 
-Rule for every decision: write it down. A silver table is only trusted if its rules are written.
+**`silver/survey_rejected.csv`**: rows you refuse, with their raw values and a `reject_reason`.
+Never drop a row silently.
 
-## What makes it real (and why AI cannot finish it alone)
+**`gold/students_by_region.csv`**: students per city and province, with share of class (%).
 
-- **Same city, many spellings**: `Jogja`, `YK`, `Yogya`, `Kab. Sleman`, `Jaksel`, `Surakarta`, `Bali`.
-  Is Sleman part of Yogyakarta? Is Bali a city?
-- **Dates in 8 formats**: `07-06-2003`, `Apr 11 1999`, `28/10/2001`, `22/03/04`. Day or month first?
-- **Coffee as text**: `0 cups`, `1-2`, `12+`, `every day`, `idk`, and a `50`.
-- **15 students answered twice.** Some double-clicked, some corrected an answer. Which one is true?
-- **Impossible rows**: a birthday after the survey, negative coffee, hometown `Mars`.
-  Drop them silently, or keep them somewhere?
+## Rules
 
-An AI will pick answers silently. Students must notice each choice, decide, and defend it.
+1. One script does it all: `python3 pipeline.py` rebuilds silver and gold from bronze. Running it twice gives the same rows (only `_loaded_at` changes).
+2. Write down every decision you make, as comments in `pipeline.py`. A table is only trusted if its rules are written.
+3. Done means you can explain where every bronze row went:
+   **bronze rows = silver rows + rejected rows + duplicates removed.**
 
-## Reference rules and numbers
+## Go further
 
-`python3 reference_solution.py` (run only after the exercise: it fills the students' folders).
-Its rules are written at the top of the file. In short: reject unknown city, future birthday and
-negative coffee into quarantine; latest submission per student wins; unparseable values become
-blank; coffee over 21 a week is kept but flagged as an outlier and left out of gold statistics.
-
-Its data-quality report:
-
-| Metric | Value |
-|---|---|
-| Bronze rows | 300 |
-| Rejected (city unknown 4, birthday in future 2, coffee negative 2) | 8 |
-| Duplicates resolved (latest wins) | 15 |
-| Silver rows, one per student | 277 |
-| Coffee outliers flagged | 1 |
-| Blank birthday / coffee / drink | 5 / 7 / 4 |
-
-**Check: 300 = 277 + 8 + 15.** The script fails if this accounting does not add up.
-
-Gold, top of each table:
-
-| Table | Top rows |
-|---|---|
-| `students_by_region` | Yogyakarta 86 (31.0%), Jakarta 47 (17.0%), Bandung 25 (9.0%) |
-| `coffee_by_city` | Yogyakarta: 83 answers, avg 4.32, median 3 |
-| `drink_preference_by_age_group` | 20 or under: Tea 31.7%, Coffee 26.8%, Matcha 17.1% |
-
-## Debrief
-
-Collect a few students' silver row counts and top city. They will differ. Ask what they
-decided for Sleman, the resubmissions, and the `50` cups. Then show the row-accounting check:
-a professional silver layer can explain where every bronze row went.
+- `silver/ref_city.csv`: city, province, island
+- `gold/coffee_by_city.csv`: average and median cups per week, per city
+- `gold/drink_preference_by_age_group.csv`: favourite drink share within each age group
