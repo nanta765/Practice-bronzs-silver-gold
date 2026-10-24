@@ -9,3 +9,6 @@ silver/_dq_report.csv
 gold/students_by_region.csv
 gold/coffee_by_city.csv
 gold/drink_preference_by_age_group.csv
+
+# macOS
+.DS_Store
